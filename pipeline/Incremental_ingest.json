@@ -31,14 +31,56 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"containers": "bronze",
-							"files": "cdc",
-							"folder": "cdc.json"
+							"files": "cdc.json",
+							"folder": "cdc"
 						}
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "azureTodataLake",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from @{pipeline().parameters.schema}.@{pipeline().parameters.table} where @{pipeline().parameters.cdc_json} > ",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			},
+			"cdc_json": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }
